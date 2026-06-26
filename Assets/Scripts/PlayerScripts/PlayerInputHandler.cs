@@ -1,0 +1,106 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerInputHandler : MonoBehaviour
+{
+    [Header("Input Actions")]
+    public InputActionReference Move;
+    public InputActionReference Fire;
+    public InputActionReference Jump;
+    public InputActionReference Crouch;
+    public InputActionReference Sprint;
+
+    [Header("Input Values")]
+    public Vector3 moveDirection;
+
+    public bool sprint;
+    public bool crouch;
+
+    // One-frame triggers
+    public bool jump;
+    public bool attack;
+
+    private void OnEnable()
+    {
+        Move.action.Enable();
+        Fire.action.Enable();
+        Jump.action.Enable();
+        Crouch.action.Enable();
+        Sprint.action.Enable();
+
+        Fire.action.performed += OnFire;
+        Jump.action.performed += OnJump;
+
+        Sprint.action.started += OnSprintStarted;
+        Sprint.action.canceled += OnSprintCanceled;
+
+        Crouch.action.started += OnCrouchStarted;
+        Crouch.action.canceled += OnCrouchCanceled;
+    }
+
+    private void OnDisable()
+    {
+        Fire.action.performed -= OnFire;
+        Jump.action.performed -= OnJump;
+
+        Sprint.action.started -= OnSprintStarted;
+        Sprint.action.canceled -= OnSprintCanceled;
+
+        Crouch.action.started -= OnCrouchStarted;
+        Crouch.action.canceled -= OnCrouchCanceled;
+
+        Move.action.Disable();
+        Fire.action.Disable();
+        Jump.action.Disable();
+        Crouch.action.Disable();
+        Sprint.action.Disable();
+    }
+
+    private void Update()
+    {
+        // Continuous movement input
+        Vector2 moveInput = Move.action.ReadValue<Vector2>();
+        moveDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
+
+        // Reset one-frame triggers
+        jump = false;
+        attack = false;
+    }
+
+    private void LateUpdate()
+    {
+        // Reset triggers after everyone has had a chance to read them this frame.
+        jump = false;
+        attack = false;
+    }
+
+    private void OnJump(InputAction.CallbackContext context)
+    {
+        jump = true;
+    }
+
+    private void OnFire(InputAction.CallbackContext context)
+    {
+        attack = true;
+    }
+
+    private void OnSprintStarted(InputAction.CallbackContext context)
+    {
+        sprint = true;
+    }
+
+    private void OnSprintCanceled(InputAction.CallbackContext context)
+    {
+        sprint = false;
+    }
+
+    private void OnCrouchStarted(InputAction.CallbackContext context)
+    {
+        crouch = true;
+    }
+
+    private void OnCrouchCanceled(InputAction.CallbackContext context)
+    {
+        crouch = false;
+    }
+}
