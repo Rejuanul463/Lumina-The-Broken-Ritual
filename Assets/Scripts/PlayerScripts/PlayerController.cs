@@ -26,17 +26,12 @@ public class PlayerController : MonoBehaviour
         playerMovement = GetComponent<PlayerMovement>();
         combat = GetComponent<PlayerCombat>();
     }
-    // Update is called once per frame
-    void FixedUpdate()
+
+    void Update()
     {
         if(currentState == PlayerState.NormalState)
             playerMovement.MovementTick(ref controller, ref animator, ref playerInput);
         else if(currentState == PlayerState.CombatState)
             PlayerCombat.CombateTick(ref controller, ref animator, ref playerInput);
-    }
-
-    void Update()
-    {
-        playerMovement.InputUpdate(ref playerInput);
     }
 }

@@ -9,10 +9,11 @@ public class PlayerInputHandler : MonoBehaviour
     public InputActionReference Jump;
     public InputActionReference Crouch;
     public InputActionReference Sprint;
-
+    public  InputActionReference look;
+    
     [Header("Input Values")]
     public Vector3 moveDirection;
-
+    public Vector2 lookDirection;
     public bool sprint;
     public bool crouch;
 
@@ -61,7 +62,9 @@ public class PlayerInputHandler : MonoBehaviour
         // Continuous movement input
         Vector2 moveInput = Move.action.ReadValue<Vector2>();
         moveDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
-
+        
+        lookDirection = look.action.ReadValue<Vector2>();
+        
         // Reset one-frame triggers
         jump = false;
         attack = false;

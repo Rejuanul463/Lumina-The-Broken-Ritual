@@ -1,90 +1,121 @@
-using System;
-using Unity.VisualScripting;
+using System.Collections;
+using NUnit.Framework.Constraints;
+using Unity.Android.Gradle.Manifest;
 using UnityEngine;
-using UnityEngine.EventSystems;
+
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Components")] 
     private PlayerController playerController;
-    private Vector3 movement;
-    Vector3 speedVelocity;
-    private float verticalVelocity;
-    private bool jumpRequested;
-    private Vector3 horizontalMovement;
 
-    [Header("Movement Parameters")] 
+    [Header("Movement Parameters")]
+    [SerializeField] private bool doMove;
+    private Vector3 moveDir;
+    private Vector3 speedVelocity;
+    private Vector3 horizontalMovement = Vector3.zero;
     private float currentSpeed;
     private float speed;
+    private bool jumpRequested;
     [SerializeField] private float walkSpeed;
     [SerializeField] private float runSpeed;
-    [SerializeField] private float jumpForce;
-    [SerializeField] private float gravity;
+    private float verticalVelocity;
+    
+    [Header("Rotation Parameters")]
+    [SerializeField] public Transform cam;
+    [SerializeField] private float turnSmoothTime = 0.1f;
+    private float turnSmoothVelocity;
+    
+    [Header("Jump Parameters")]
     [SerializeField] private bool isGrounded;
-    [SerializeField] private float feetRadius;
-    
-    
-    [Header("Components")] 
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private Transform feet;
+    [SerializeField] private float gravity = 20f;
+    [SerializeField] private float jumpHeight = 3f;
     
     private void Start()
     {
+        doMove = true;
+        // Time.timeScale = .4f;
+        cam = Camera.main.transform;
         playerController = GetComponent<PlayerController>();
         speed = walkSpeed;
-    }
-
-    public void InputUpdate(ref PlayerInputHandler inputHandler)
-    {
-        if (inputHandler.jump)
-        {
-            jumpRequested = true;
-        }
     }
     
     public void MovementTick(ref CharacterController controller, ref Animator animator, ref PlayerInputHandler inputHandler)
     {
         playerSpeedHandler(inputHandler.sprint);
+        Vector3 direction = inputHandler.moveDirection;
 
-        isGrounded = Physics.CheckSphere(feet.position, feetRadius, groundMask);
+        isGrounded = Physics.CheckSphere(feet.position, 0.1f, groundMask);
 
         if (isGrounded)
         {
-            // Horizontal movement
-            float accelerationTime = .5f;
-            float decelerationTime = .5f;
-
-            Vector3 targetVelocity = inputHandler.moveDirection.sqrMagnitude > 0f
-                ? inputHandler.moveDirection * speed
-                : Vector3.zero;
-
-            horizontalMovement = Vector3.SmoothDamp(
-                horizontalMovement,
-                targetVelocity,
-                ref speedVelocity,
-                targetVelocity.sqrMagnitude > horizontalMovement.sqrMagnitude
-                    ? accelerationTime
-                    : decelerationTime
-            );
-            
-            animator.SetFloat("Speed", horizontalMovement.magnitude / runSpeed);
-            
-            if (verticalVelocity < 0)
+            // Keep the controller grounded
+            if (verticalVelocity < 0f)
                 verticalVelocity = -2f;
 
+            if (inputHandler.jump)
+            {
+                Debug.Log("jump requested");
+                jumpRequested = true;
+            }
+
+            if (direction.magnitude > 0.1f)
+            {
+                float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+                float angle = Mathf.SmoothDampAngle(
+                    transform.eulerAngles.y,
+                    targetAngle,
+                    ref turnSmoothVelocity,
+                    turnSmoothTime);
+
+                transform.rotation = Quaternion.Euler(0f, angle, 0f);
+
+                float delta = Mathf.DeltaAngle(transform.eulerAngles.y, targetAngle);
+
+                if (Mathf.Abs(delta) < 1f)
+                    animator.SetFloat("direction", 0f);
+                else if (delta > 0f)
+                    animator.SetFloat("direction", 0.1f);
+                else
+                    animator.SetFloat("direction", -0.1f);
+
+                moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            }
+            else
+            {
+                moveDir = Vector3.zero;
+            }
+
+            // Apply jump AFTER movement direction is calculated
             if (jumpRequested)
             {
-                verticalVelocity = Mathf.Sqrt(jumpForce * -2f * gravity);
+                Debug.Log("jump requested");
+                animator.SetTrigger("Jump");
+                verticalVelocity = Mathf.Sqrt(jumpHeight * 2f * gravity);
                 jumpRequested = false;
             }
         }
         else
         {
-            verticalVelocity += 2 * gravity * Time.fixedDeltaTime;
+            // Apply gravity
+            verticalVelocity -= gravity * Time.deltaTime;
         }
 
-        movement = horizontalMovement;
-        movement.y = verticalVelocity;
-        controller.Move(movement * Time.fixedDeltaTime);
+        animator.SetBool("isGround", isGrounded);
+
+        Vector3 smoothedMovement = SmoothMovement(moveDir.normalized);
+
+        animator.SetFloat(
+            "Speed",
+            new Vector3(smoothedMovement.x, 0f, smoothedMovement.z).magnitude / runSpeed
+        );
+
+        // Apply vertical movement
+        smoothedMovement.y = verticalVelocity;
+
+        if(doMove) controller.Move(smoothedMovement * Time.deltaTime);
     }
     
     private void playerSpeedHandler(bool sprint)
@@ -92,10 +123,52 @@ public class PlayerMovement : MonoBehaviour
         if (sprint)
         {
             speed = runSpeed;
+            turnSmoothTime = 0.2f;
+            accelerationTime = 0.2f;
+            decelerationTime = 0.5f;
         }
         else
         {
             speed = walkSpeed;
+            StartCoroutine(ChangeAcceleration(decelerationTime));
         }
     }
+
+    IEnumerator ChangeAcceleration(float time)
+    {
+        yield return new WaitForSeconds(time);
+        accelerationTime = 0.05f;
+        decelerationTime = 0.02f;
+        turnSmoothTime = 0.1f;
+    }
+
+    private float accelerationTime;
+    private float decelerationTime;
+    private Vector3 SmoothMovement(Vector3 moveDirection)
+    {
+        Vector3 targetVelocity = moveDirection.sqrMagnitude > 0f
+            ?  moveDirection * speed
+            : Vector3.zero;
+    
+    
+        float acceleration;
+        // if (targetVelocity.sqrMagnitude > horizontalMovement.sqrMagnitude) acceleration = accelerationTime;
+        // else if (targetVelocity.sqrMagnitude == 0f) acceleration = decelerationTime;
+        // else acceleration = 0f;
+        
+        horizontalMovement = Vector3.SmoothDamp(
+            horizontalMovement,
+            targetVelocity,
+            ref speedVelocity,
+            targetVelocity.sqrMagnitude > horizontalMovement.sqrMagnitude ? accelerationTime : decelerationTime
+        );
+        return horizontalMovement;
+    }
+
+    public void enableDoMove() { doMove = true;}
+
+    public void disableDoMove() { doMove = false;}
 }
+
+
+
