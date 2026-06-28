@@ -1,8 +1,11 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerInputHandler : MonoBehaviour
 {
+    private static PlayerController playerController;
+    
     [Header("Input Actions")]
     public InputActionReference Move;
     public InputActionReference Fire;
@@ -15,11 +18,17 @@ public class PlayerInputHandler : MonoBehaviour
     public Vector3 moveDirection;
     public Vector2 lookDirection;
     public bool sprint;
-    public bool crouch;
 
     // One-frame triggers
     public bool jump;
     public bool attack;
+    public bool crouch;
+
+
+    private void Start()
+    {
+        playerController = GetComponent<PlayerController>();
+    }
 
     private void OnEnable()
     {
@@ -35,8 +44,8 @@ public class PlayerInputHandler : MonoBehaviour
         Sprint.action.started += OnSprintStarted;
         Sprint.action.canceled += OnSprintCanceled;
 
-        Crouch.action.started += OnCrouchStarted;
-        Crouch.action.canceled += OnCrouchCanceled;
+        Crouch.action.performed += OnCrouchStarted;
+        // Crouch.action.canceled += OnCrouchCanceled;
     }
 
     private void OnDisable()
@@ -47,8 +56,8 @@ public class PlayerInputHandler : MonoBehaviour
         Sprint.action.started -= OnSprintStarted;
         Sprint.action.canceled -= OnSprintCanceled;
 
-        Crouch.action.started -= OnCrouchStarted;
-        Crouch.action.canceled -= OnCrouchCanceled;
+        Crouch.action.performed -= OnCrouchStarted;
+        // Crouch.action.canceled -= OnCrouchCanceled;
 
         Move.action.Disable();
         Fire.action.Disable();
@@ -75,6 +84,7 @@ public class PlayerInputHandler : MonoBehaviour
         // Reset triggers after everyone has had a chance to read them this frame.
         jump = false;
         attack = false;
+        crouch = false;
     }
 
     private void OnJump(InputAction.CallbackContext context)
@@ -85,6 +95,7 @@ public class PlayerInputHandler : MonoBehaviour
     private void OnFire(InputAction.CallbackContext context)
     {
         attack = true;
+        playerController.currentState = PlayerState.CombatState;
     }
 
     private void OnSprintStarted(InputAction.CallbackContext context)
@@ -101,9 +112,5 @@ public class PlayerInputHandler : MonoBehaviour
     {
         crouch = true;
     }
-
-    private void OnCrouchCanceled(InputAction.CallbackContext context)
-    {
-        crouch = false;
-    }
+    
 }

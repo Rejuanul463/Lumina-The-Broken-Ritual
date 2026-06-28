@@ -10,7 +10,6 @@ public class PlayerMovement : MonoBehaviour
     private PlayerController playerController;
 
     [Header("Movement Parameters")]
-    [SerializeField] private bool doMove;
     private Vector3 moveDir;
     private Vector3 speedVelocity;
     private Vector3 horizontalMovement = Vector3.zero;
@@ -33,9 +32,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float gravity = 20f;
     [SerializeField] private float jumpHeight = 3f;
     
+    [Header("Crouch Parameters")]
+    private bool isCrouching;
+    [SerializeField] private float crouchSpeed = 2f;
+    
     private void Start()
     {
-        doMove = true;
         // Time.timeScale = .4f;
         cam = Camera.main.transform;
         playerController = GetComponent<PlayerController>();
@@ -44,7 +46,21 @@ public class PlayerMovement : MonoBehaviour
     
     public void MovementTick(ref CharacterController controller, ref Animator animator, ref PlayerInputHandler inputHandler)
     {
-        playerSpeedHandler(inputHandler.sprint);
+        if (inputHandler.crouch && playerController.doMove)
+        {
+            isCrouching = !isCrouching;
+            animator.SetBool("isCrouching", isCrouching);
+        }
+        
+        if (isCrouching)
+        {
+            speed = crouchSpeed;
+        }
+        else
+        {
+            playerSpeedHandler(inputHandler.sprint);
+        }
+        
         Vector3 direction = inputHandler.moveDirection;
 
         isGrounded = Physics.CheckSphere(feet.position, 0.1f, groundMask);
@@ -55,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
             if (verticalVelocity < 0f)
                 verticalVelocity = -2f;
 
-            if (inputHandler.jump)
+            if (inputHandler.jump && !isCrouching && playerController.doMove)
             {
                 Debug.Log("jump requested");
                 jumpRequested = true;
@@ -115,7 +131,7 @@ public class PlayerMovement : MonoBehaviour
         // Apply vertical movement
         smoothedMovement.y = verticalVelocity;
 
-        if(doMove) controller.Move(smoothedMovement * Time.deltaTime);
+        if(playerController.doMove) controller.Move(smoothedMovement * Time.deltaTime);
     }
     
     private void playerSpeedHandler(bool sprint)
@@ -164,10 +180,6 @@ public class PlayerMovement : MonoBehaviour
         );
         return horizontalMovement;
     }
-
-    public void enableDoMove() { doMove = true;}
-
-    public void disableDoMove() { doMove = false;}
 }
 
 

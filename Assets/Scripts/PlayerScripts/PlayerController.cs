@@ -1,6 +1,6 @@
 using UnityEngine;
 
-enum PlayerState
+public enum PlayerState
 {
     NormalState,
     CombatState
@@ -14,7 +14,8 @@ public class PlayerController : MonoBehaviour
     private PlayerMovement playerMovement;
     private PlayerCombat combat;
     
-    PlayerState currentState;
+    public PlayerState currentState;
+    public bool doMove = true;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -32,6 +33,10 @@ public class PlayerController : MonoBehaviour
         if(currentState == PlayerState.NormalState)
             playerMovement.MovementTick(ref controller, ref animator, ref playerInput);
         else if(currentState == PlayerState.CombatState)
-            PlayerCombat.CombateTick(ref controller, ref animator, ref playerInput);
+            combat.CombateTick(ref controller, ref animator, ref playerInput);
     }
+    
+    public void enableDoMove() { doMove = true;}
+
+    public void disableDoMove() { doMove = false;}
 }
