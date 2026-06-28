@@ -13,6 +13,7 @@ public class PlayerInputHandler : MonoBehaviour
     public InputActionReference Crouch;
     public InputActionReference Sprint;
     public  InputActionReference look;
+    public InputActionReference rightClick;
     
     [Header("Input Values")]
     public Vector3 moveDirection;
@@ -23,6 +24,7 @@ public class PlayerInputHandler : MonoBehaviour
     public bool jump;
     public bool attack;
     public bool crouch;
+    public bool parry;
 
 
     private void Start()
@@ -37,10 +39,12 @@ public class PlayerInputHandler : MonoBehaviour
         Jump.action.Enable();
         Crouch.action.Enable();
         Sprint.action.Enable();
+        rightClick.action.Enable();
 
         Fire.action.performed += OnFire;
         Jump.action.performed += OnJump;
-
+        rightClick.action.started += OnParryStarted;
+        rightClick.action.canceled += OnParryEnded;
         Sprint.action.started += OnSprintStarted;
         Sprint.action.canceled += OnSprintCanceled;
 
@@ -50,6 +54,9 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void OnDisable()
     {
+        rightClick.action.started -= OnParryStarted;
+        rightClick.action.canceled -= OnParryEnded;
+        
         Fire.action.performed -= OnFire;
         Jump.action.performed -= OnJump;
 
@@ -112,5 +119,15 @@ public class PlayerInputHandler : MonoBehaviour
     {
         crouch = true;
     }
-    
+
+    private void OnParryStarted(InputAction.CallbackContext context)
+    {
+        parry = true;
+        playerController.currentState = PlayerState.CombatState;
+    }
+
+    private void OnParryEnded(InputAction.CallbackContext context)
+    {
+        parry = false;
+    }
 }

@@ -954,12 +954,14 @@ MonoBehaviour:
   Crouch: {fileID: 7040659881675835329, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   Sprint: {fileID: -7471211009204490832, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   look: {fileID: -5630151704836100654, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  rightClick: {fileID: 4941525940132201473, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   moveDirection: {x: 0, y: 0, z: 0}
   lookDirection: {x: 0, y: 0}
   sprint: 0
   jump: 0
   attack: 0
   crouch: 0
+  parry: 0
 --- !u!143 &480938580
 CharacterController:
   m_ObjectHideFlags: 0
@@ -994,7 +996,7 @@ Animator:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 480938575}
   m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 2e97c150fb004f84ba9a30a654e91e56, type: 3}
+  m_Avatar: {fileID: 9000000, guid: 6ca14798289c44abe9cef0a8a4d3925a, type: 2}
   m_Controller: {fileID: 9100000, guid: b039df7eaed3c4425a9d2279b980a54d, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
@@ -4882,12 +4884,14 @@ MonoBehaviour:
   Crouch: {fileID: 7040659881675835329, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   Sprint: {fileID: -7471211009204490832, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   look: {fileID: -5630151704836100654, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  rightClick: {fileID: 0}
   moveDirection: {x: 0, y: 0, z: 0}
   lookDirection: {x: 0, y: 0}
   sprint: 0
   jump: 0
   attack: 0
   crouch: 0
+  parry: 0
 --- !u!114 &5866666021817670657
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerCombat : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class PlayerCombat : MonoBehaviour
     [Header("Movement Parameters")]
     private bool jumpRequested;
     private float verticalVelocity;
+    private float walkSpeed = 2f;
     
     [Header("Jump Parameters")]
     [SerializeField] private bool isGrounded;
@@ -20,6 +22,7 @@ public class PlayerCombat : MonoBehaviour
 
     [Header("Combat Parameters")] [SerializeField]
     private int slashState;
+    public bool isParrying;
     
     private void Start()
     {
@@ -29,6 +32,17 @@ public class PlayerCombat : MonoBehaviour
     
     public void CombateTick(ref CharacterController controller, ref Animator animator, ref PlayerInputHandler inputHandler)
     {
+        if (inputHandler.parry)
+        {
+            isParrying = true;
+            animator.SetBool("Parrying", true);
+        }
+        else if(isParrying)
+        {
+            isParrying = false;
+            animator.SetBool("Parrying", false);
+            ResetAttack();
+        }
         VerticalMovement(ref controller, ref animator, ref inputHandler);
         isGrounded = Physics.CheckSphere(feet.position, 0.1f, groundMask);
         if (isGrounded)
@@ -40,7 +54,6 @@ public class PlayerCombat : MonoBehaviour
                 Debug.Log("Perform Slash");
                 if(slashState < 2)  slashState += 1;
             }
-            
         }
         animator.SetInteger("Slash", slashState);
         animator.SetFloat("Speed", 0f);
@@ -78,8 +91,17 @@ public class PlayerCombat : MonoBehaviour
     }
 
 
+    private void HorizontalMovement(ref PlayerInputHandler inputHandler, ref Animator animator, ref CharacterController controller)
+    {
+        // animator.SetLayerWeight();
+        Vector3 moveDirection = inputHandler.moveDirection.magnitude > 0.1f ? inputHandler.moveDirection.normalized + Camera.main.transform.forward : Vector3.zero;
+        controller.Move(moveDirection * walkSpeed * Time.deltaTime);
+        animator.SetFloat("xDir", moveDirection.x);
+        animator.SetFloat("zDir", moveDirection.z);
+    }
     public void ResetAttack()
     {
         slashState = 0;
+        playerController.currentState = PlayerState.NormalState;
     }
 }

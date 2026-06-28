@@ -8,7 +8,7 @@ public enum PlayerState
 public class PlayerController : MonoBehaviour
 {
     private CharacterController controller;
-    private Animator animator;
+    public Animator animator;
     private PlayerInputHandler playerInput;
     
     private PlayerMovement playerMovement;
@@ -30,8 +30,12 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if(currentState == PlayerState.NormalState)
+        if (currentState == PlayerState.NormalState)
+        {
+            combat.ResetAttack();
+            animator.SetInteger("Slash", 0);
             playerMovement.MovementTick(ref controller, ref animator, ref playerInput);
+        }
         else if(currentState == PlayerState.CombatState)
             combat.CombateTick(ref controller, ref animator, ref playerInput);
     }
