@@ -52,7 +52,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("isCrouching", isCrouching);
         }
         
-        if (isCrouching)
+        if (isCrouching && !playerController.isFocused)
         {
             speed = crouchSpeed;
         }
@@ -73,41 +73,27 @@ public class PlayerMovement : MonoBehaviour
 
             if (inputHandler.jump && !isCrouching && playerController.doMove)
             {
-                Debug.Log("jump requested");
                 jumpRequested = true;
             }
 
             if (direction.magnitude > 0.1f)
             {
-                float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
-                float angle = Mathf.SmoothDampAngle(
-                    transform.eulerAngles.y,
-                    targetAngle,
-                    ref turnSmoothVelocity,
-                    turnSmoothTime);
-
-                transform.rotation = Quaternion.Euler(0f, angle, 0f);
-
-                float delta = Mathf.DeltaAngle(transform.eulerAngles.y, targetAngle);
-
-                if (Mathf.Abs(delta) < 1f)
-                    animator.SetFloat("direction", 0f);
-                else if (delta > 0f)
-                    animator.SetFloat("direction", 0.1f);
+                if (playerController.isFocused)
+                {
+                    FocusedMovement(ref direction);
+                }
                 else
-                    animator.SetFloat("direction", -0.1f);
-
-                moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+                {
+                    UnfocusedMovement(ref animator, ref direction);
+                }
             }
             else
             {
                 moveDir = Vector3.zero;
             }
-
             // Apply jump AFTER movement direction is calculated
             if (jumpRequested)
             {
-                Debug.Log("jump requested");
                 animator.SetTrigger("Jump");
                 verticalVelocity = Mathf.Sqrt(jumpHeight * 2f * gravity);
                 jumpRequested = false;
@@ -127,24 +113,68 @@ public class PlayerMovement : MonoBehaviour
             "Speed",
             new Vector3(smoothedMovement.x, 0f, smoothedMovement.z).magnitude / runSpeed
         );
+        
+        animator.SetFloat("xDir",  direction.x * animMultiplier);
+        animator.SetFloat("zDir", direction.z * animMultiplier);
 
         // Apply vertical movement
         smoothedMovement.y = verticalVelocity;
 
         if(playerController.doMove) controller.Move(smoothedMovement * Time.deltaTime);
     }
+
+    private void UnfocusedMovement(ref Animator animator, ref Vector3 direction)
+    {
+        float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+        float angle = Mathf.SmoothDampAngle(
+            transform.eulerAngles.y,
+            targetAngle,
+            ref turnSmoothVelocity,
+            turnSmoothTime);
+
+        transform.rotation = Quaternion.Euler(0f, angle, 0f);
+
+        float delta = Mathf.DeltaAngle(transform.eulerAngles.y, targetAngle);
+
+        if (Mathf.Abs(delta) < 1f)
+            animator.SetFloat("direction", 0f);
+        else if (delta > 0f)
+            animator.SetFloat("direction", 0.1f);
+        else
+            animator.SetFloat("direction", -0.1f);
+
+        moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+    }
     
+    private void FocusedMovement(ref Vector3 direction)
+    {
+        moveDir = transform.right * direction.x +
+                  transform.forward * direction.z;
+        
+        if (moveDir.sqrMagnitude > 1f)
+            moveDir.Normalize();
+    }
+    private float animMultiplier = 1f;
     private void playerSpeedHandler(bool sprint)
     {
         if (sprint)
         {
-            speed = runSpeed;
-            turnSmoothTime = 0.2f;
-            accelerationTime = 0.2f;
-            decelerationTime = 0.5f;
+            if (playerController.isFocused)
+            {
+                speed = runSpeed * 0.6f;
+                animMultiplier = 1f;
+            }
+            else
+            {
+                speed = runSpeed;
+                turnSmoothTime = 0.2f;
+                accelerationTime = 0.2f;
+                decelerationTime = 0.5f;
+            }
         }
         else
         {
+            animMultiplier = 0.5f;
             speed = walkSpeed;
             StartCoroutine(ChangeAcceleration(decelerationTime));
         }
@@ -165,12 +195,6 @@ public class PlayerMovement : MonoBehaviour
         Vector3 targetVelocity = moveDirection.sqrMagnitude > 0f
             ?  moveDirection * speed
             : Vector3.zero;
-    
-    
-        float acceleration;
-        // if (targetVelocity.sqrMagnitude > horizontalMovement.sqrMagnitude) acceleration = accelerationTime;
-        // else if (targetVelocity.sqrMagnitude == 0f) acceleration = decelerationTime;
-        // else acceleration = 0f;
         
         horizontalMovement = Vector3.SmoothDamp(
             horizontalMovement,

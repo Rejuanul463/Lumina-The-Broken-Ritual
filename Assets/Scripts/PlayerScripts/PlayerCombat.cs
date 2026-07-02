@@ -1,6 +1,4 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class PlayerCombat : MonoBehaviour
 {
@@ -10,7 +8,6 @@ public class PlayerCombat : MonoBehaviour
     [Header("Movement Parameters")]
     private bool jumpRequested;
     private float verticalVelocity;
-    private float walkSpeed = 2f;
     
     [Header("Jump Parameters")]
     [SerializeField] private bool isGrounded;
@@ -43,15 +40,15 @@ public class PlayerCombat : MonoBehaviour
             animator.SetBool("Parrying", false);
             ResetAttack();
         }
+        
         VerticalMovement(ref controller, ref animator, ref inputHandler);
         isGrounded = Physics.CheckSphere(feet.position, 0.1f, groundMask);
         if (isGrounded)
         {
-            if(inputHandler.sprint) animator.SetBool("Shifted", true);
-            else animator.SetBool("Shifted", false);
+            // if(inputHandler.sprint) animator.SetBool("Shifted", true);
+            // else animator.SetBool("Shifted", false);
             if (inputHandler.attack)
             {
-                Debug.Log("Perform Slash");
                 if(slashState < 2)  slashState += 1;
             }
         }
@@ -89,16 +86,7 @@ public class PlayerCombat : MonoBehaviour
         animator.SetBool("isGround", isGrounded);
         controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
     }
-
-
-    private void HorizontalMovement(ref PlayerInputHandler inputHandler, ref Animator animator, ref CharacterController controller)
-    {
-        // animator.SetLayerWeight();
-        Vector3 moveDirection = inputHandler.moveDirection.magnitude > 0.1f ? inputHandler.moveDirection.normalized + Camera.main.transform.forward : Vector3.zero;
-        controller.Move(moveDirection * walkSpeed * Time.deltaTime);
-        animator.SetFloat("xDir", moveDirection.x);
-        animator.SetFloat("zDir", moveDirection.z);
-    }
+    
     public void ResetAttack()
     {
         slashState = 0;

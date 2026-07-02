@@ -11,6 +11,11 @@ public class PlayerController : MonoBehaviour
     public Animator animator;
     private PlayerInputHandler playerInput;
     
+    public float detectionDistance = 5f;
+    public LayerMask enemyLayer;
+    public Transform Target;
+    public bool isFocused = false;
+    
     private PlayerMovement playerMovement;
     private PlayerCombat combat;
     
@@ -38,9 +43,47 @@ public class PlayerController : MonoBehaviour
         }
         else if(currentState == PlayerState.CombatState)
             combat.CombateTick(ref controller, ref animator, ref playerInput);
+        
+        if (Target != null)
+        {
+            if (isFocused)
+            {
+                transform.LookAt(new Vector3(Target.position.x, transform.position.y, Target.position.z));
+            }
+            if (Vector3.Distance(Target.position, transform.position) > detectionDistance)
+            {
+                Target = null;
+                isFocused = false;
+                animator.SetBool("Lock", false);
+            }
+        }
     }
     
     public void enableDoMove() { doMove = true;}
 
     public void disableDoMove() { doMove = false;}
+
+    public void SelectEnemy()
+    {
+        if (Target == null)
+        {
+            Collider[] targets = Physics.OverlapSphere(transform.position, detectionDistance, enemyLayer );
+            float minDistance = float.MaxValue;
+            foreach (Collider target in targets)
+            {
+                float dist = Vector3.Distance(transform.position, target.transform.position);
+                if (dist < minDistance)
+                {
+                    minDistance = dist;
+                    Target = target.transform;
+                }
+            }
+        }
+
+        if (Target != null)
+        {
+            isFocused = true;
+            animator.SetBool("Lock", true);
+        }
+    }
 }

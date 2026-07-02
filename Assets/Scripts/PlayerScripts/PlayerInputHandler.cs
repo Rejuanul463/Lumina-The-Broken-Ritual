@@ -103,6 +103,7 @@ public class PlayerInputHandler : MonoBehaviour
     {
         attack = true;
         playerController.currentState = PlayerState.CombatState;
+        playerController.SelectEnemy();
     }
 
     private void OnSprintStarted(InputAction.CallbackContext context)
