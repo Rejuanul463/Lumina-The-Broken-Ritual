@@ -1,10 +1,11 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerCombat : MonoBehaviour
 {
     [Header("Components")] 
     private PlayerController playerController;
-
+    
     [Header("Movement Parameters")]
     private bool jumpRequested;
     private float verticalVelocity;
@@ -20,6 +21,9 @@ public class PlayerCombat : MonoBehaviour
     [Header("Combat Parameters")] [SerializeField]
     private int slashState;
     public bool isParrying;
+    private float NextAttackTime;
+    [SerializeField] private float hitCooldown = 0.2f;
+    [SerializeField] private float attackCooldown = 2f;
     
     private void Start()
     {
@@ -47,9 +51,10 @@ public class PlayerCombat : MonoBehaviour
         {
             // if(inputHandler.sprint) animator.SetBool("Shifted", true);
             // else animator.SetBool("Shifted", false);
-            if (inputHandler.attack)
+            if (inputHandler.attack && Time.time > NextAttackTime)
             {
-                if(slashState < 2)  slashState += 1;
+                if (slashState < 2) slashState += 1;
+                else NextAttackTime = Time.time + attackCooldown;
             }
         }
         animator.SetInteger("Slash", slashState);
@@ -91,5 +96,10 @@ public class PlayerCombat : MonoBehaviour
     {
         slashState = 0;
         playerController.currentState = PlayerState.NormalState;
+    }
+
+    public void increaseNextAttackTime()
+    {
+        NextAttackTime += hitCooldown;
     }
 }

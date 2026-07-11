@@ -23,8 +23,8 @@ public class CameraFollow : MonoBehaviour
     [Header("Focus Settings")]
     [SerializeField] private float focusPitchOffset = 30f;
 
-    private float yaw;
-    private float pitch;
+    [SerializeField] private float yaw;
+    [SerializeField] private float pitch;
 
     private float currentYaw;
     private float currentPitch;
@@ -38,11 +38,11 @@ public class CameraFollow : MonoBehaviour
 
     void Start()
     {
-        playerInputHandler = target.GetComponent<PlayerInputHandler>();
+        // playerInputHandler = target.GetComponent<PlayerInputHandler>();
         Vector3 angles = transform.eulerAngles;
 
-        yaw = angles.y;
-        pitch = angles.x;
+        // yaw = angles.y;
+        // pitch = angles.x;
 
         currentYaw = yaw;
         currentPitch = pitch;

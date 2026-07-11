@@ -2,14 +2,17 @@ using UnityEngine;
 
 public class EnmeyCombate : EnemyStates
 {
-    [SerializeField] private float attackCooldown = 2f;
+    [Header("Attack")]
+    [SerializeField] private float attackCooldown = 1.2f;
 
     private float nextAttackTime;
-    private bool startTick = false;
-    private float dualSlashProbability;
+    private bool startTick;
+
     public override void Enter()
     {
         agent.isStopped = true;
+        agent.ResetPath();
+
         nextAttackTime = Time.time;
         startTick = true;
     }
@@ -17,11 +20,12 @@ public class EnmeyCombate : EnemyStates
     public override void ObjectTick()
     {
         if (!startTick)
-        {
             return;
-        }
-        // Lost player completely
-        if (playerDistance > detectionRange)
+
+        UpdateStateData();
+
+        // Lost the player
+        if (playerTransform == null)
         {
             stateMachine.ChangeState(stateMachine.idleState);
             return;
@@ -36,11 +40,12 @@ public class EnmeyCombate : EnemyStates
 
         // Face the player
         Vector3 direction = playerTransform.position - transform.position;
-        direction.y = 0;
+        direction.y = 0f;
 
-        if (direction != Vector3.zero)
+        if (direction.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
+
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 targetRotation,
@@ -50,29 +55,36 @@ public class EnmeyCombate : EnemyStates
         // Attack
         if (Time.time >= nextAttackTime)
         {
-            dualSlashProbability = Random.Range(0f, 100f) / 100f;
+            float dualSlashProbability = Random.Range(0f, 1f);
+            
             animator.SetFloat("DualSlashProbability", dualSlashProbability);
             animator.SetTrigger("Attack");
             
-            if(dualSlashProbability > 0.5) nextAttackTime = Time.time + 1.5f * attackCooldown;
-            else nextAttackTime =  Time.time + attackCooldown;
+            nextAttackTime = Time.time + attackCooldown;
         }
     }
-    
 
     public override void Exit()
     {
-        animator.SetTrigger("Move");
         startTick = false;
+        animator.SetTrigger("Move");
     }
 
+    // Animation Event
     public void AttackPerformed()
     {
-        Debug.Log("Attack");
+        Debug.Log("Attack Performed");
     }
 
-    public void dualSlashPerformed()
+    // Animation Event
+    public void DualSlashPerformed()
     {
-        Debug.Log("DualSlash");
+        Debug.Log("Dual Slash Performed");
+    }
+
+    // Animation Event
+    public void IncreaseNextAttackTime(float extraTime)
+    {
+        nextAttackTime += extraTime;
     }
 }

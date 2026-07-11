@@ -2,49 +2,77 @@ using UnityEngine;
 
 public class EnemyMovement : EnemyStates
 {
-    public float walkSpeed;
-    public float runSpeed;
-    
-    public float walkStart = .3f;
-    private bool startTick = false;
+    [Header("Movement")]
+    public float walkSpeed = 2f;
+    public float runSpeed = 4f;
+
+    [Range(0f, 1f)]
+    public float walkStart = 0.3f;
+
+    private bool startTick;
+
     public override void Enter()
     {
         agent.isStopped = false;
+
+        animator.ResetTrigger("Idle");
         animator.SetTrigger("Move");
+
         startTick = true;
     }
 
     public override void ObjectTick()
     {
-        if (!startTick) return;
-        // Lost player
-        if (playerDistance > detectionRange)
-        {
-            stateMachine.ChangeState(stateMachine.idleState);
+        if (!startTick)
             return;
-        }
-        
-        if (playerDistance < detectionRange * walkStart)
+
+        UpdateStateData();
+
+        // Chase the player
+        if (playerTransform != null && playerDistance <= detectionRange)
         {
-            agent.speed = walkSpeed;
-            animator.SetFloat("Speed", walkStart);
+            stateMachine.currentTarget = playerTransform.position;
+
+            agent.speed = playerDistance <= detectionRange * walkStart
+                ? walkSpeed
+                : runSpeed;
+
+            animator.SetFloat("Speed",
+                playerDistance <= detectionRange * walkStart
+                    ? walkStart
+                    : 1f);
+
+            agent.stoppingDistance = stateMachine.attackDistance;
+            agent.SetDestination(stateMachine.currentTarget);
+
+            // Switch to combat
+            if (!agent.pathPending &&
+                playerDistance <= agent.stoppingDistance)
+            {
+                stateMachine.ChangeState(stateMachine.combatState);
+                return;
+            }
         }
+        // Patrol
         else
         {
-            agent.speed = runSpeed;
-            animator.SetFloat("Speed", 1f);
-        }
+            agent.speed = walkSpeed;
+            agent.stoppingDistance = 0.1f;
 
-        // Update destination every frame
-        agent.SetDestination(playerTransform.position);
+            animator.SetFloat("Speed", walkStart);
 
-        // Close enough to attack
-        if (playerDistance <= agent.stoppingDistance)
-        {
-            stateMachine.ChangeState(stateMachine.combatState);
+            // currentTarget should already contain the waypoint position
+            agent.SetDestination(stateMachine.currentTarget);
+
+            // Arrived at patrol point
+            if (!agent.pathPending &&
+                agent.remainingDistance <= agent.stoppingDistance)
+            {
+                stateMachine.ChangeState(stateMachine.idleState);
+                Debug.Log(stateMachine.idleState);
+            }
         }
     }
-    
 
     public override void Exit()
     {

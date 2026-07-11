@@ -16,8 +16,8 @@ public class PlayerMovement : MonoBehaviour
     private float currentSpeed;
     private float speed;
     private bool jumpRequested;
-    [SerializeField] private float walkSpeed;
-    [SerializeField] private float runSpeed;
+    [SerializeField] private float walkSpeed = 2;
+    [SerializeField] private float runSpeed = 7;
     private float verticalVelocity;
     
     [Header("Rotation Parameters")]
@@ -80,7 +80,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 if (playerController.isFocused)
                 {
-                    FocusedMovement(ref direction);
+                    FocusedMovement(ref direction, ref animator);
                 }
                 else
                 {
@@ -114,9 +114,12 @@ public class PlayerMovement : MonoBehaviour
             new Vector3(smoothedMovement.x, 0f, smoothedMovement.z).magnitude / runSpeed
         );
         
-        animator.SetFloat("xDir",  direction.x * animMultiplier);
-        animator.SetFloat("zDir", direction.z * animMultiplier);
+        // animator.SetFloat("xDir",  direction.x * animMultiplier);
+        // animator.SetFloat("zDir", direction.z * animMultiplier);
+        Vector3 localMove = transform.InverseTransformDirection(moveDir);
 
+        animator.SetFloat("xDir", localMove.x * animMultiplier);
+        animator.SetFloat("zDir", localMove.z * animMultiplier);
         // Apply vertical movement
         smoothedMovement.y = verticalVelocity;
 
@@ -146,22 +149,37 @@ public class PlayerMovement : MonoBehaviour
         moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
     }
     
-    private void FocusedMovement(ref Vector3 direction)
+    private void FocusedMovement(ref Vector3 direction, ref Animator animator)
     {
-        moveDir = transform.right * direction.x +
-                  transform.forward * direction.z;
-        
+        // Flatten the camera vectors
+        Vector3 camForward = cam.forward;
+        Vector3 camRight = cam.right;
+
+        camForward.y = 0f;
+        camRight.y = 0f;
+
+        camForward.Normalize();
+        camRight.Normalize();
+
+        // Camera-relative movement
+        moveDir = camForward * direction.z +
+                  camRight * direction.x;
+
         if (moveDir.sqrMagnitude > 1f)
+        {
             moveDir.Normalize();
+        }
     }
+    
     private float animMultiplier = 1f;
     private void playerSpeedHandler(bool sprint)
     {
         if (sprint)
         {
+            playerController.isFocused = false;
             if (playerController.isFocused)
             {
-                speed = runSpeed * 0.6f;
+                speed = runSpeed * 0.4f;
                 animMultiplier = 1f;
             }
             else
@@ -174,9 +192,16 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            animMultiplier = 0.5f;
+            animMultiplier = .5f;
             speed = walkSpeed;
             StartCoroutine(ChangeAcceleration(decelerationTime));
+        }
+        
+        // Only for wizkid
+        if (playerController.isFocused)
+        {
+            speed = runSpeed * 0.5f;
+            animMultiplier = 1f;
         }
     }
 
