@@ -41,7 +41,14 @@ public class EnemyHealth : MonoBehaviour
     private void Death()
     {
         animator.SetBool("Death", true);
-        GetComponent<EnemyStateMachine>().enabled = false;
+        if( GetComponent<EnemyStateMachine>() != null)
+            GetComponent<EnemyStateMachine>().enabled = false;
+        else if (GetComponent<CreaturesAi>() != null)
+        {
+            GetComponent<CreaturesAi>().enabled = false;
+        }
         weapon.SetActive(false);
+        
+        
     }
 }

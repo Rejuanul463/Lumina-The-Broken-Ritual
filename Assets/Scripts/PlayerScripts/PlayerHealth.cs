@@ -22,11 +22,21 @@ public class PlayerHealth : MonoBehaviour
         {
             return; 
         }
-        if (collider.tag != "EnemySword")
+
+        float damage = 10;
+        if (collider.tag == "EnemyHeavyAttack")
+        {
+            damage = 20;
+        }else if (collider.tag == "EnemySword")
+        {
+            damage = 20;
+        }
+        else
         {
             return;
         }
-        currentHealth -= 10f;
+        Debug.Log(damage);
+        currentHealth -= damage;
         animator.SetTrigger("Damage");
         if (currentHealth <= 0)
         {

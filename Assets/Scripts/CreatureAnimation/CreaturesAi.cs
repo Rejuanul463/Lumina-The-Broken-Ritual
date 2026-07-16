@@ -21,6 +21,10 @@ public class CreaturesAi : MonoBehaviour
     private float nextAttackTime;
     private bool isInnitiatingPowerAttack = true;
     private float walkState = 0.3f;
+    private bool isMovable = true;
+    private Vector3 position;
+
+    private int attackCount;
     
     [SerializeField] private BattleArena battleArena;
     
@@ -35,6 +39,9 @@ public class CreaturesAi : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isMovable) agent.isStopped = false;
+        else agent.isStopped = true;
+        
         if (state == CreatureState.move)
         {
             move();
@@ -92,10 +99,22 @@ public class CreaturesAi : MonoBehaviour
 
     private void Attack()
     {
+        if (attackCount % 4 == 0)
+        {
+            PowerAttack();
+            return;
+        }
         if (Time.time > nextAttackTime)
         {
+            isMovable = false;
             nextAttackTime = Time.time + attackCoolDown;
             anim.SetTrigger("Attack");
+        }
+        transform.LookAt(battleArena.player.transform);
+
+        if (Vector3.Distance(transform.position, battleArena.player.transform.position) > agent.stoppingDistance)
+        {
+            state = CreatureState.move;
         }
     }
 
@@ -103,23 +122,35 @@ public class CreaturesAi : MonoBehaviour
     //Need to fix
     private void PowerAttack()
     {
+        transform.LookAt(battleArena.player.transform);
+        isMovable = false;
         if (isInnitiatingPowerAttack)
         {
             isInnitiatingPowerAttack = false;
-            Vector3 postion = transform.position;
-            postion.z -= stoppingDistance + 2f;
+            position = transform.position - transform.forward;
+            position.y = transform.position.y;
             anim.SetTrigger("WalkBack");
-            agent.SetDestination(postion);
+            
         }
-
-        if (agent.remainingDistance <= agent.stoppingDistance)
+        transform.position =  Vector3.MoveTowards(transform.position, position, walkSpeed * Time.deltaTime);
+        Debug.Log(position);
+        if (transform.position.x == position.x && transform.position.z == position.z)
         {
             anim.SetTrigger("PowerAttack");
+            state = CreatureState.idle;
         }
     }
 
     public void powerAttackComplete()
     {
         isInnitiatingPowerAttack  = true;
+        isMovable = true;
+        attackCount++;
+    }
+
+    public void AttackPerformed()
+    {
+        isMovable = true;
+        attackCount++;
     }
 }
