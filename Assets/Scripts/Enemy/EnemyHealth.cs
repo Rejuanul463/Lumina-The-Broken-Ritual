@@ -21,34 +21,25 @@ public class EnemyHealth : MonoBehaviour
     
     void OnTriggerEnter(Collider collider)
     {
-        if (currentHealth < 0)
-        {
-            return; 
-        }
-        if (collider.tag != targetTag)
-        {
-            return;
-        }
+        if (currentHealth < 0)  return; 
+        if (collider.tag != targetTag)  return;
+        
         currentHealth -= 10f;
         animator.SetTrigger("Damage");
         // enemyCombate.increaseNextAttackTime();
-        if (currentHealth <= 0)
-        {
+        if (currentHealth <= 0) 
             Death();
-        }
     }
 
     private void Death()
     {
         animator.SetBool("Death", true);
-        if( GetComponent<EnemyStateMachine>() != null)
+        
+        if ( GetComponent<EnemyStateMachine>() != null) 
             GetComponent<EnemyStateMachine>().enabled = false;
-        else if (GetComponent<CreaturesAi>() != null)
-        {
+        else if (GetComponent<CreaturesAi>() != null) 
             GetComponent<CreaturesAi>().enabled = false;
-        }
+        
         weapon.SetActive(false);
-        
-        
     }
 }

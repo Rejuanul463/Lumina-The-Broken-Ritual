@@ -45,13 +45,16 @@ public class CreaturesAi : MonoBehaviour
         if (state == CreatureState.move)
         {
             move();
-        }else if(state == CreatureState.idle){
+        }
+        else if(state == CreatureState.idle){
             Idle();
             
-        }else if (state == CreatureState.attack)
+        }
+        else if (state == CreatureState.attack)
         {
             Attack();
-        }else if (state == CreatureState.powerAttack)
+        }
+        else if (state == CreatureState.powerAttack)
         {
             PowerAttack();
         }
@@ -117,13 +120,13 @@ public class CreaturesAi : MonoBehaviour
             state = CreatureState.move;
         }
     }
-
     
     //Need to fix
     private void PowerAttack()
     {
         transform.LookAt(battleArena.player.transform);
         isMovable = false;
+        
         if (isInnitiatingPowerAttack)
         {
             isInnitiatingPowerAttack = false;
@@ -132,6 +135,7 @@ public class CreaturesAi : MonoBehaviour
             anim.SetTrigger("WalkBack");
             
         }
+        
         transform.position =  Vector3.MoveTowards(transform.position, position, walkSpeed * Time.deltaTime);
         Debug.Log(position);
         if (transform.position.x == position.x && transform.position.z == position.z)

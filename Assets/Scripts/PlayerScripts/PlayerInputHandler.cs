@@ -1,9 +1,12 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class PlayerInputHandler : MonoBehaviour
 {
+    public bool isAndroid;
     private static PlayerController playerController;
     
     [Header("Input Actions")]
@@ -25,13 +28,28 @@ public class PlayerInputHandler : MonoBehaviour
     public bool attack;
     public bool crouch;
     public bool parry;
-
-
+    
+    public Joystick joystick;
+    public Button Attack;
+    public HoldButton Block;
+    public HoldButton Run;
+    public Button hop;
     private void Start()
     {
         playerController = GetComponent<PlayerController>();
-    }
 
+        hop.onClick.AddListener(() => OnJumpAndroid());
+        
+        Attack.onClick.AddListener(()=> OnFireAndroid());
+
+        Block.PointerDown += OnParryStartedAndroid;
+        Block.PointerUp += OnParryEndedAndroid;
+
+        Run.PointerDown += OnSprintStartedAndroid;
+        Run.PointerUp += OnSprintCanceledAndroid;
+    }
+    
+    
     private void OnEnable()
     {
         Move.action.Enable();
@@ -77,6 +95,7 @@ public class PlayerInputHandler : MonoBehaviour
     {
         // Continuous movement input
         Vector2 moveInput = Move.action.ReadValue<Vector2>();
+        if(isAndroid) moveInput = new Vector2(joystick.Horizontal, joystick.Vertical);
         moveDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         
         lookDirection = look.action.ReadValue<Vector2>();
@@ -130,5 +149,39 @@ public class PlayerInputHandler : MonoBehaviour
     private void OnParryEnded(InputAction.CallbackContext context)
     {
         parry = false;
+    }
+    
+    
+    private void OnParryStartedAndroid()
+    {
+        parry = true;
+        playerController.currentState = PlayerState.CombatState;
+    }
+
+    private void OnParryEndedAndroid()
+    {
+        parry = false;
+    }
+    
+    private void OnSprintStartedAndroid()
+    {
+        sprint = true;
+    }
+
+    private void OnSprintCanceledAndroid()
+    {
+        sprint = false;
+    }
+    
+    private void OnJumpAndroid()
+    {
+        jump = true;
+    }
+
+    private void OnFireAndroid()
+    {
+        attack = true;
+        playerController.currentState = PlayerState.CombatState;
+        playerController.SelectEnemy();
     }
 }
