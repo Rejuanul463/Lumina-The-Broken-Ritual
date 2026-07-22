@@ -25,7 +25,7 @@ public class EnemyMovement : EnemyStates
     {
         if (!startTick)
             return;
-
+        
         UpdateStateData();
 
         // Chase the player

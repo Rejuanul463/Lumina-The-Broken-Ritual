@@ -37,6 +37,7 @@ public class EnemyHealth : MonoBehaviour
         
         if ( GetComponent<EnemyStateMachine>() != null) 
             GetComponent<EnemyStateMachine>().enabled = false;
+        
         else if (GetComponent<CreaturesAi>() != null) 
             GetComponent<CreaturesAi>().enabled = false;
         

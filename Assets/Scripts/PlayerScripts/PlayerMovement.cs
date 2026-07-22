@@ -14,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 speedVelocity;
     private Vector3 horizontalMovement = Vector3.zero;
     private float currentSpeed;
-    private float speed;
+    public float speed;
     private bool jumpRequested;
     [SerializeField] private float walkSpeed = 2;
     [SerializeField] private float runSpeed = 7;
