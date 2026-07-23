@@ -1155,7 +1155,7 @@ MonoBehaviour:
   m_OverrideTileSize: 0
   m_TileSize: 256
   m_OverrideVoxelSize: 0
-  m_VoxelSize: 0.16666667
+  m_VoxelSize: 0.083333336
   m_MinRegionArea: 2
   m_NavMeshData: {fileID: 23800000, guid: c6e573bb502c14180be3e44e194925d3, type: 2}
   m_BuildHeightMesh: 0
@@ -3234,6 +3234,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6b91e61462804c22a02a8d32d5334ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
+  speed: 0
   walkSpeed: 2
   runSpeed: 7
   cam: {fileID: 0}
@@ -3260,7 +3261,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   isAndroid: 0
   Move: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  Fire: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   Jump: {fileID: -2099379676528639254, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   Crouch: {fileID: 7040659881675835329, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   Sprint: {fileID: -7471211009204490832, guid: 052faaac586de48259a63d0c4782560b, type: 3}
@@ -3278,6 +3278,7 @@ MonoBehaviour:
   Block: {fileID: 0}
   Run: {fileID: 0}
   hop: {fileID: 0}
+  unlock: {fileID: 0}
 --- !u!114 &5866666021817670657
 MonoBehaviour:
   m_ObjectHideFlags: 0

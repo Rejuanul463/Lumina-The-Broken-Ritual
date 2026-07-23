@@ -9,9 +9,11 @@ public class PlayerInputHandler : MonoBehaviour
     public bool isAndroid;
     private static PlayerController playerController;
     
+    public static Action OpenCageGate;
+   
     [Header("Input Actions")]
     public InputActionReference Move;
-    public InputActionReference Fire;
+    // public InputActionReference Fire;
     public InputActionReference Jump;
     public InputActionReference Crouch;
     public InputActionReference Sprint;
@@ -34,6 +36,8 @@ public class PlayerInputHandler : MonoBehaviour
     public HoldButton Block;
     public HoldButton Run;
     public Button hop;
+
+    public Button unlock;
     private void Start()
     {
         playerController = GetComponent<PlayerController>();
@@ -47,19 +51,26 @@ public class PlayerInputHandler : MonoBehaviour
 
         Run.PointerDown += OnSprintStartedAndroid;
         Run.PointerUp += OnSprintCanceledAndroid;
+        
+        unlock.onClick.AddListener(() => UnlockCage());
+    }
+
+    private void UnlockCage()
+    {
+        OpenCageGate?.Invoke();
     }
     
     
     private void OnEnable()
     {
         Move.action.Enable();
-        Fire.action.Enable();
+        // Fire.action.Enable();
         Jump.action.Enable();
         Crouch.action.Enable();
         Sprint.action.Enable();
         rightClick.action.Enable();
 
-        Fire.action.performed += OnFire;
+        // Fire.action.performed += OnFire;
         Jump.action.performed += OnJump;
         rightClick.action.started += OnParryStarted;
         rightClick.action.canceled += OnParryEnded;
@@ -75,7 +86,7 @@ public class PlayerInputHandler : MonoBehaviour
         rightClick.action.started -= OnParryStarted;
         rightClick.action.canceled -= OnParryEnded;
         
-        Fire.action.performed -= OnFire;
+        // Fire.action.performed -= OnFire;
         Jump.action.performed -= OnJump;
 
         Sprint.action.started -= OnSprintStarted;
@@ -85,7 +96,7 @@ public class PlayerInputHandler : MonoBehaviour
         // Crouch.action.canceled -= OnCrouchCanceled;
 
         Move.action.Disable();
-        Fire.action.Disable();
+        // Fire.action.Disable();
         Jump.action.Disable();
         Crouch.action.Disable();
         Sprint.action.Disable();
