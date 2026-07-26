@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using UnityEngine;
 
@@ -7,11 +6,15 @@ public class OpenCage : MonoBehaviour
     private bool playerInside;
     public Transform door;
     private Quaternion doorRotation;
-
+    
     [SerializeField] private TeamNPC npcFree;
+    [SerializeField] private GameObject unlockButton;
+    
+    [SerializeField] private LookAtTarget lookAtTarget;
     private void Start()
     {
         doorRotation = Quaternion.Euler(0, -80, 0);
+        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -19,6 +22,7 @@ public class OpenCage : MonoBehaviour
         if (other.tag == "Player")
         {
             playerInside = true;
+            unlockButton.SetActive(true);
         }
     }
 
@@ -27,6 +31,7 @@ public class OpenCage : MonoBehaviour
         if (other.tag == "Player")
         {
             playerInside = false;
+            unlockButton.SetActive(false);
         }
     }
 
@@ -66,5 +71,12 @@ public class OpenCage : MonoBehaviour
         }
         // Snap exactly to target at the end
         door.localRotation = targetRotation;
+    }
+
+    public void ShowUI()
+    {
+        lookAtTarget.UpdateTarget();
+        UIManager.instance.companionUI.SetActive(true);
+        UIManager.instance.AssignHero(npcFree);
     }
 }

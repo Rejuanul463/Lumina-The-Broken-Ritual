@@ -35,6 +35,9 @@ public class EnemyHealth : MonoBehaviour
     {
         animator.SetBool("Death", true);
         
+        gameObject.layer = LayerMask.NameToLayer("Default");
+        gameObject.tag = "Untagged";
+        
         if ( GetComponent<EnemyStateMachine>() != null) 
             GetComponent<EnemyStateMachine>().enabled = false;
         

@@ -23,11 +23,13 @@ public class CreaturesAi : MonoBehaviour
     private float walkState = 0.3f;
     private bool isMovable = true;
     private Vector3 position;
-
+    
     private int attackCount;
     
     [SerializeField] private BattleArena battleArena;
     
+    
+    [SerializeField] private GameObject Arrow;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -64,6 +66,11 @@ public class CreaturesAi : MonoBehaviour
     {
         if(battleArena.isPlayerInside)
         {
+            if(Arrow != null)
+            {
+                Arrow.SetActive(false);
+                Arrow = null;
+            }
             if (agent.remainingDistance * walkState * 2 > agent.stoppingDistance)
             {
                 agent.speed = runSpeed;

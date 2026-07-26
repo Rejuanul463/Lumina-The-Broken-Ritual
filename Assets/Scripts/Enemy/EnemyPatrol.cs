@@ -4,6 +4,7 @@ public class FollowPlayer : EnemyStates
 {
     public Transform player;
     public PlayerMovement playerMovement;
+    
     public override void Enter()
     {
         animator.Play("Move");
