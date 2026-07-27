@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UnityEngine.UI;
 public class PlayerHealth : MonoBehaviour
 {
     public float MaxHealth = 100f;
@@ -7,11 +7,15 @@ public class PlayerHealth : MonoBehaviour
     private Animator animator;
     public GameObject weapon;
     public PlayerCombat combat;
+    
+    public Slider healthBar;
     public void Start()
     {
         combat = GetComponent<PlayerCombat>();
         currentHealth = MaxHealth;
         animator = GetComponent<Animator>();
+        healthBar.maxValue = MaxHealth;
+        healthBar.value = currentHealth;
     }
     
     
@@ -35,8 +39,8 @@ public class PlayerHealth : MonoBehaviour
         {
             return;
         }
-        Debug.Log(damage);
         currentHealth -= damage;
+        healthBar.value = currentHealth;
         animator.SetTrigger("Damage");
         if (currentHealth <= 0)
         {
@@ -46,6 +50,8 @@ public class PlayerHealth : MonoBehaviour
 
     private void Death()
     {
+        gameObject.tag = "Untagged";
+        gameObject.layer = LayerMask.NameToLayer("Default");
         animator.SetBool("Death", true);
         if (GetComponent<EnemyStateMachine>() != null)
         {

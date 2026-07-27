@@ -1,6 +1,6 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyHealth : MonoBehaviour
 {
@@ -11,11 +11,16 @@ public class EnemyHealth : MonoBehaviour
     public GameObject weapon;
     
     public String targetTag;
+    
+    public Slider healthBar;
     public void Start()
     {
         currentHealth = MaxHealth;
         animator = GetComponent<Animator>();
         enemyCombate = GetComponent<EnmeyCombate>();
+        
+        healthBar.maxValue = MaxHealth;
+        healthBar.value = currentHealth;
     }
     
     
@@ -25,6 +30,7 @@ public class EnemyHealth : MonoBehaviour
         if (collider.tag != targetTag)  return;
         
         currentHealth -= 10f;
+        healthBar.value = currentHealth;
         animator.SetTrigger("Damage");
         // enemyCombate.increaseNextAttackTime();
         if (currentHealth <= 0) 
@@ -45,5 +51,6 @@ public class EnemyHealth : MonoBehaviour
             GetComponent<CreaturesAi>().enabled = false;
         
         weapon.SetActive(false);
+        healthBar.gameObject.SetActive(false);
     }
 }

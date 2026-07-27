@@ -109,7 +109,7 @@ public class PlayerInputHandler : MonoBehaviour
         if(isAndroid) moveInput = new Vector2(joystick.Horizontal, joystick.Vertical);
         moveDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
         
-        lookDirection = look.action.ReadValue<Vector2>();
+        // lookDirection = look.action.ReadValue<Vector2>();
         
         // Reset one-frame triggers
         jump = false;

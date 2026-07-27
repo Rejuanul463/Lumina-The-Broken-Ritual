@@ -61,7 +61,7 @@ public class TeamNPC : MonoBehaviour
 
     void FollowPlayer()
     {
-        agent.speed = 4.5f;
+        agent.speed = 3.8f;
         gameObject.layer = Mathf.RoundToInt(Mathf.Log(playerLayer.value, 2));
         gameObject.tag = playerTag;
         agent.SetDestination(player.transform.position);
