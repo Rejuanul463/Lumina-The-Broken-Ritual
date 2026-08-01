@@ -35,15 +35,24 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        bool isMoving = false;
+        if (playerInput.moveDirection.magnitude > 0.1f) isMoving = true;
+        else isMoving = false;
+        animator.SetBool("isMovingCombate", isMoving);
+        
         if (currentState == PlayerState.NormalState)
         {
             combat.ResetAttack();
             animator.SetInteger("Slash", 0);
             playerMovement.MovementTick(ref controller, ref animator, ref playerInput);
         }
-        else if(currentState == PlayerState.CombatState)
+        else if (currentState == PlayerState.CombatState)
+        {
             combat.CombateTick(ref controller, ref animator, ref playerInput);
-        
+            if (isMoving)
+                playerMovement.MovementTick(ref controller, ref animator, ref playerInput);
+        }
+
         if (Target != null)
         {
             if (isFocused)
