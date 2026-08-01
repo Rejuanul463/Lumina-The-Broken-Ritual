@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         bool isMoving = false;
-        if (playerInput.moveDirection.magnitude > 0.1f) isMoving = true;
+        if (playerInput.moveDirection.magnitude > 0f) isMoving = true;
         else isMoving = false;
         animator.SetBool("isMovingCombate", isMoving);
         
