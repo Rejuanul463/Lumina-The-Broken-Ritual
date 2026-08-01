@@ -9,6 +9,7 @@ public class EnemyHealth : MonoBehaviour
     private Animator animator;
     private EnmeyCombate enemyCombate;
     public GameObject weapon;
+    public bool isDied;
     
     public String targetTag;
     
@@ -31,7 +32,8 @@ public class EnemyHealth : MonoBehaviour
         
         currentHealth -= 10f;
         healthBar.value = currentHealth;
-        animator.SetTrigger("Damage");
+        if(!isDied)
+            animator.SetTrigger("Damage");
         // enemyCombate.increaseNextAttackTime();
         if (currentHealth <= 0) 
             Death();
@@ -39,6 +41,7 @@ public class EnemyHealth : MonoBehaviour
 
     private void Death()
     {
+        isDied  = true;
         animator.SetBool("Death", true);
         
         gameObject.layer = LayerMask.NameToLayer("Default");
