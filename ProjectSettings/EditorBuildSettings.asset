@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/AZURE Nature/Demo/AN_Demo.unity
+    path: Assets/Scenes/AN_Demo.unity
     guid: 383aeff0143f15b48a904c9837dacc3e
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
