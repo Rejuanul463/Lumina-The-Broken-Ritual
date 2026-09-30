@@ -1,15 +1,28 @@
 using UnityEngine;
 using UnityEngine.AI;
 
+/// <summary>
+/// Base class for every enemy AI state (Idle, Movement, Combat, ...).
+/// It caches the components all states need and provides shared helper data.
+/// Each state must implement:
+///   Enter()      - called once when the state becomes active
+///   ObjectTick() - called every frame by EnemyStateMachine while the state is active
+///   Exit()       - called once when leaving the state
+/// To add a new state: derive from this class, add it to the enemy, and switch to it with
+/// stateMachine.ChangeState(...).
+/// Requires on the same GameObject: Animator, NavMeshAgent, EnemyStateMachine.
+/// </summary>
 public abstract class EnemyStates : MonoBehaviour
 {
     protected Animator animator;
     protected NavMeshAgent agent;
     protected EnemyStateMachine stateMachine;
 
+    // Current target (player) and patrol points, refreshed by UpdateStateData()
     protected Transform playerTransform;
     protected Transform[] targetPoints;
 
+    // Distance to the target (Infinity if there is none) and the detection radius
     protected float playerDistance;
     protected float detectionRange;
 
@@ -44,6 +57,7 @@ public abstract class EnemyStates : MonoBehaviour
         }
         else
         {
+            // No target -> treat as infinitely far away
             playerDistance = Mathf.Infinity;
         }
     }
